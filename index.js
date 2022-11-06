@@ -1,3 +1,9 @@
+window.addEventListener('load', function () {
+    getAllBands();
+  })
+
+
+
 function signup(event) {
     event.preventDefault()
     console.log("signup kaldt")
@@ -66,22 +72,52 @@ function createBand(event){
         });
 }
 
-function createEvent(event){
+async function createBandEvent(event){
     event.preventDefault()
-    const eventField = document.getElementById("eventField").value;
+    const venueField = document.getElementById("venueField").value;
+    const dateField = document.getElementById("dateField").value;
+    const bandField = document.getElementById("bandField").value;
 
-    let payload = {name: eventField};
+    console.log("Band id: " + bandField);
+
+    let payload = {
+        venue: venueField,
+        date: dateField
+    };
 
     payload = JSON.stringify(payload);
 
     const localstorage_user = JSON.parse(localStorage.getItem('user'));
     const inMemoryToken = localstorage_user.token;
 
-    fetch("http://localhost:8080/createEvent",
+
+    await fetch(`http://localhost:8080/createEvent?bandId=${bandField}`,
         {
             method: "POST",
             body: payload,
             headers:{'content-type': 'application/json',
                         'Authorization': 'Bearer ' + inMemoryToken }
         });
+
+}
+
+
+async function getAllBands(){
+
+    let bandOptions = "";
+
+    let responseGetAllBands = await fetch("http://localhost:8080/getAllBands",
+    {
+        method: "GET",
+        headers:{'content-type': 'application/json'}
+    });
+
+let bandData = await responseGetAllBands.json();
+
+for (let bandDataIndex in bandData) {
+    let entryBand = bandData[bandDataIndex];
+    bandOptions += `<option value="${entryBand.id}">${entryBand.name}</option>`;
+    }
+
+    document.getElementById("bandField").innerHTML = bandOptions;
 }
